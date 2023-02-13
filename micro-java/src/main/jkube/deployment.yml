@@ -29,7 +29,7 @@ spec:
           valueFrom:
             fieldRef:
               fieldPath: metadata.namespace
-        enFrom:
+        envFrom:
           - configMapRef:
               name: configmap-hello
         image: micro-java:1.0
