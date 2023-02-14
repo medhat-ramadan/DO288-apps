@@ -1,0 +1,72 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    app.openshift.io/vcs-ref: todo-migrate
+    jkube.io/git-url: https://github.com/medhat-ramadan/DO288-apps.git
+    app.openshift.io/vcs-uri: https://github.com/medhat-ramadan/DO288-apps.git
+    jkube.io/git-commit: f355431fb67e02bf81041c1ddf395770a774c657
+    jkube.io/git-branch: todo-migrate
+  labels:
+    app: todo-api
+    provider: jkube
+    version: 1.0.0-SNAPSHOT
+    group: com.redhat.training.openshift.todoapi
+  name: todo-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: todo-api
+      provider: jkube
+      group: com.redhat.training.openshift.todoapi
+  template:
+    metadata:
+      labels:
+        app: todo-api
+        provider: jkube
+        version: 1.0.0-SNAPSHOT
+        group: com.redhat.training.openshift.todoapi
+    spec:
+      containers:
+      - env:
+        - name: KUBERNETES_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        - name: DATABASE_PASSWORD
+          valueFrom:
+            configMapKeyRef:
+              key: DATABASE_PASSWORD
+              name: todo-api
+        - name: DATABASE_SVC_HOSTNAME
+          valueFrom:
+            configMapKeyRef:
+              key: DATABASE_SVC_HOSTNAME
+              name: todo-api
+        - name: DATABASE_USER
+          valueFrom:
+            configMapKeyRef:
+              key: DATABASE_USER
+              name: todo-api
+        - name: DATABASE_NAME
+          valueFrom:
+            configMapKeyRef:
+              key: DATABASE_NAME
+              name: todo-api              
+        image: todo-api:latest
+        imagePullPolicy: IfNotPresent
+        name: quarkus
+        ports:
+        - containerPort: 8080
+          name: http
+          protocol: TCP
+        - containerPort: 9779
+          name: prometheus
+          protocol: TCP
+        - containerPort: 8778
+          name: jolokia
+          protocol: TCP
+        securityContext:
+          privileged: false
